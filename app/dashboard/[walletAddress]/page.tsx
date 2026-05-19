@@ -198,7 +198,7 @@ const CreateCampaignModal = ({
       const contract = getContract({
         client,
         chain: sepolia,
-        address: "0x7a012897Dd3ec19D7A8646F51609610B105D7D57",
+        address: "0xd8eD379f1Ff70526a579393283d19573384e95a7",
       });
 
       const transaction = prepareContractCall({

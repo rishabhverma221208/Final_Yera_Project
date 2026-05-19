@@ -180,6 +180,7 @@ export default function CampaignCard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showExtendDeadline, setShowExtendDeadline] = useState(false);
   const [daysToAdd, setDaysToAdd] = useState<string>("");
+  const [customAmount, setCustomAmount] = useState<string>("");
 
   const contract = getContract({
     client,
@@ -581,25 +582,37 @@ export default function CampaignCard() {
             </div>
           )}
 
-          <div className="mt-10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
-                  SDG Community Support
-                </p>
+          {/* Custom Donation Section */}
+          <div
+  className="
+    mt-10
+    bg-white
+    border border-emerald-100
+    rounded-3xl
+    p-6 md:p-8
+    shadow-sm
+  "
+>
+  {/* Shared Header */}
+  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+    <div>
+      <p className="text-sm font-semibold uppercase tracking-wide text-emerald-600">
+        SDG Community Support
+      </p>
 
-                <h2 className="text-2xl font-bold text-slate-800 mt-1">
-                  Contribution Levels
-                </h2>
+      <h2 className="text-3xl font-bold text-slate-800 mt-1">
+        Support This Campaign
+      </h2>
 
-                <p className="text-slate-500 text-sm mt-1">
-                  Support this mission through meaningful contributions.
-                </p>
-              </div>
+      <p className="text-slate-500 text-sm mt-2 max-w-2xl">
+        Choose a contribution level or make a custom donation to help this
+        mission achieve meaningful impact.
+      </p>
+    </div>
 
-              {isEditing && (
-                <button
-                  className="
+    {isEditing && (
+      <button
+        className="
           px-5 py-3 rounded-2xl
           bg-gradient-to-r
           from-emerald-500
@@ -609,35 +622,118 @@ export default function CampaignCard() {
           hover:opacity-90
           transition
         "
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  + Create Support Level
-                </button>
-              )}
-            </div>
+        onClick={() => setIsModalOpen(true)}
+      >
+        + Create Support Level
+      </button>
+    )}
+  </div>
 
-            {/* Tier Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {isLoadingTiers ? (
-                <div className="col-span-full text-center py-10">
-                  <p className="text-slate-500">
-                    Loading contribution levels...
-                  </p>
-                </div>
-              ) : tiers && tiers.length > 0 ? (
-                tiers.map((tier, index) => (
-                  <TierCard
-                    key={index}
-                    tier={tier}
-                    index={index}
-                    contract={contract}
-                    isEditing={isEditing}
-                  />
-                ))
-              ) : (
-                !isEditing && (
-                  <div
-                    className="
+  {/* Custom Donation Card */}
+  <div
+    className="
+      bg-gradient-to-r
+      from-emerald-50
+      to-teal-50
+      border border-emerald-100
+      rounded-3xl
+      p-6
+      mb-8
+    "
+  >
+    <div className="flex items-center gap-4 mb-5">
+      <div
+        className="
+          w-14 h-14 rounded-2xl
+          bg-white
+          flex items-center justify-center
+          text-2xl shadow-sm
+        "
+      >
+        ❤️
+      </div>
+
+      <div>
+        <p className="text-sm uppercase tracking-wide text-emerald-600 font-semibold">
+          Flexible Contribution
+        </p>
+
+        <h3 className="text-2xl font-bold text-slate-800">
+          Make a Custom Donation
+        </h3>
+      </div>
+    </div>
+
+    <div className="flex flex-col sm:flex-row gap-4">
+      <input
+        type="number"
+        placeholder="Enter custom donation amount"
+        value={customAmount}
+        onChange={(e) => setCustomAmount(e.target.value)}
+        className="
+          flex-1 px-4 py-3 rounded-2xl
+          border border-slate-200
+          bg-white
+          focus:outline-none
+          focus:ring-2 focus:ring-emerald-500
+        "
+      />
+
+      <TransactionButton
+        transaction={() =>
+          prepareContractCall({
+            contract,
+            method: "function customFund() payable",
+            params: [],
+            value: BigInt(customAmount),
+          })
+        }
+        onTransactionConfirmed={() => {
+          alert("Donation successful!");
+          setCustomAmount("");
+        }}
+        onError={(error) => alert(error.message)}
+        disabled={!customAmount || Number(customAmount) <= 0}
+        theme={lightTheme()}
+      >
+        Donate Now
+      </TransactionButton>
+    </div>
+  </div>
+
+  {/* Tier Section */}
+  <div className="mb-5">
+    <h3 className="text-2xl font-bold text-slate-800">
+      Contribution Levels
+    </h3>
+
+    <p className="text-slate-500 text-sm mt-1">
+      Select a predefined support tier for this campaign.
+    </p>
+  </div>
+
+  {/* Tier Grid */}
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {isLoadingTiers ? (
+      <div className="col-span-full text-center py-10">
+        <p className="text-slate-500">
+          Loading contribution levels...
+        </p>
+      </div>
+    ) : tiers && tiers.length > 0 ? (
+      tiers.map((tier, index) => (
+        <TierCard
+          key={index}
+          tier={tier}
+          index={index}
+          contract={contract}
+          isEditing={isEditing}
+        />
+      ))
+    ) : (
+      !isEditing && (
+        <div
+          className="
             col-span-full
             bg-emerald-50
             border border-emerald-100
@@ -645,19 +741,19 @@ export default function CampaignCard() {
             p-8
             text-center
           "
-                  >
-                    <h3 className="text-xl font-bold text-slate-700 mb-2">
-                      No Support Levels Yet
-                    </h3>
+        >
+          <h3 className="text-xl font-bold text-slate-700 mb-2">
+            No Support Levels Yet
+          </h3>
 
-                    <p className="text-slate-500 text-sm">
-                      Contribution opportunities will appear here soon.
-                    </p>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
+          <p className="text-slate-500 text-sm">
+            Contribution opportunities will appear here soon.
+          </p>
+        </div>
+      )
+    )}
+  </div>
+</div>
         </div>
       )}
       {/* Modal */}
